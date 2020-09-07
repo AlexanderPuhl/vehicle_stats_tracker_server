@@ -1,0 +1,9 @@
+{
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#362e72",
+    "titleBar.inactiveBackground": "#362e72",
+    "tab.activeBackground": "#362e72"
+},
+"editor.detectIndentation": false,
+"editor.insertSpaces": false
+}
