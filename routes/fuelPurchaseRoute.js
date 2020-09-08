@@ -5,10 +5,13 @@ const router = express.Router();
 
 const { fuelController } = require('../controllers');
 
-router.route('/').get(fuelController.getAllFuelPurchases);
-router.route('/:fuelPurchaseId').get(fuelController.getOneFuelPurchase);
-router.route('/').post(fuelController.createFuelPurchase);
-router.route('/:fuelPurchaseId').put(fuelController.updateFuelPurchase);
-router.route('/:fuelPurchaseId').delete(fuelController.deleteFuelPurchase);
+router.route('/')
+	.get(fuelController.getAllFuelPurchases)
+	.post(fuelController.createFuelPurchase);
+
+router.route('/:fuelPurchaseId')
+	.get(fuelController.getOneFuelPurchase)
+	.put(fuelController.updateFuelPurchase)
+	.delete(fuelController.deleteFuelPurchase);
 
 module.exports = router;
