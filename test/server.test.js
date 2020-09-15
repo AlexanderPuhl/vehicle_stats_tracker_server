@@ -1,14 +1,17 @@
 /* eslint-disable */
+process.env.NODE_ENV = 'test';
+
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const app = require('../server');
+const { NODE_ENV } = require('../config');
 
 const expect = chai.expect;
 chai.use(chaiHttp);
 
 describe('Environment', () => {
   it('Node_ENV should be "test"', () => {
-    expect(process.env.NODE_ENV).to.equal('test');
+    expect(NODE_ENV).to.equal('test');
   });
 });
 
