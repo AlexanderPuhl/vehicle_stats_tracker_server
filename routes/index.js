@@ -7,10 +7,6 @@ const passport = require('passport');
 const localStrategy = require('../passport/localStrategy');
 const jwtStrategy = require('../passport/jwt');
 
-const userRoute = require('./userRoute');
-const vehicleRoute = require('./vehicleRoute');
-const fuelPurchaseRoute = require('./fuelPurchaseRoute')
-
 passport.use(localStrategy);
 passport.use(jwtStrategy);
 
@@ -20,8 +16,8 @@ const jwtAuth = passport.authenticate('jwt', {
 	failWithError: true,
 });
 
-router.use('/api/user', userRoute);
-router.use('/api/vehicle', jwtAuth, vehicleRoute);
-router.use('/api/fuel_purchase', jwtAuth, fuelPurchaseRoute);
+router.use('/api/user', require('./userRoute'));
+router.use('/api/vehicle', jwtAuth, require('./vehicleRoute'));
+router.use('/api/fuel_purchase', jwtAuth, require('./fuelPurchaseRoute'));
 
 module.exports = router;
