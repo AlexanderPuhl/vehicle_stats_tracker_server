@@ -1,6 +1,8 @@
+'use strict';
+
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
 const { JWT_SECRET } = require('../config');
-const knex = require('../db/knexConfig.js');
+const pg = require('../db/pg');
 
 const options = {
 	secretOrKey: JWT_SECRET,
@@ -8,39 +10,22 @@ const options = {
 	algorithms: ['HS256'],
 };
 
-// const jwtStrategy = new JwtStrategy(options, (payload, done) => done(null, payload.user));
+const verifyCallBack = async (payload, done) => {
+	const { user_id, username } = payload;
 
-const jwtStrategy = new JwtStrategy(options, function (payload, done) {
-	const username = payload.username;
-	const user_id = payload.user_id;
-	
-	knex('user')
-		.where({ user_id: user_id, username: username })
-		.first()
-		.then(results => {
-			user = results;
-			if (!user) {
-				return Promise.reject({
-					reason: 'LoginError',
-					message: 'Incorrect user',
-					location: 'user_id, username'
-				});
-			}
-		})
-		.then(() => {
-			let tempUser = {
-				user_id: user.user_id,
-				username: user.username,
-				email: user.email
-			};
-			return done(null, tempUser);
-		})
-		.catch(err => {
-			if (err.reason === 'LoginError') {
-				return done(null, false);
-			}
-			return done(err);
-		});
-});
+	const { rows } = await pg.query('SELECT * FROM public.user WHERE user_id = $1 AND username = $2', [user_id, username]);
+	if (rows.length === 0) {
+		return done(null, false, { message: 'Incorrect user' });
+	}
+	const row = rows[0];
+	const user = {
+		user_id: row.user_id,
+		username: row.username,
+		email: row.email
+	};
+	return done(null, user);
+}
+
+const jwtStrategy = new JwtStrategy(options, verifyCallBack);
 
 module.exports = jwtStrategy;
