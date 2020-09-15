@@ -8,7 +8,7 @@ const cors = require('cors');
 
 const routes = require('./routes');
 
-const { SERVER_PORT, CLIENT_ORIGIN } = require('./config');
+const { SERVER_PORT, CLIENT_ORIGIN, NODE_ENV } = require('./config');
 
 const app = express();
 
@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 	next(err);
 });
 
-app.use((err, res) => {
+app.use((err, req, res, next) => {
 	if (err.status) {
 		const errBody = Object.assign({}, err, { message: err.message });
 		res.status(err.status).json(errBody);
