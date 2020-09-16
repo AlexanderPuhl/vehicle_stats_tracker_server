@@ -5,6 +5,7 @@ const passport = require('passport');
 const morgan = require('morgan');
 const moment = require('moment-timezone');
 const cors = require('cors');
+const colors = require('colors');
 
 const routes = require('./routes');
 

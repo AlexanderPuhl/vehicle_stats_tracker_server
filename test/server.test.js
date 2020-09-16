@@ -9,20 +9,27 @@ const { NODE_ENV } = require('../config');
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe('Environment', () => {
-  it('Node_ENV should be "test"', () => {
-    expect(NODE_ENV).to.equal('test');
-  });
+describe('Environment'.cyan.bold, () => {
+	it(`Node_ENV should be 'test'.`.cyan, () => {
+		expect(NODE_ENV).to.equal('test');
+	});
 });
 
-describe('Basic Express setup', () => {
-  describe('404 handler', () => {
-    it('should respond with 404 when given a bad path', () =>
-      chai
-        .request(app)
-        .get('/bad/path')
-        .then((res) => {
-          expect(res).to.have.status(404);
-        }));
-  });
+describe('Basic Express setup'.cyan.bold.underline, () => {
+	describe('404 handler'.cyan.bold, () => {
+		it('should respond with 404 when given a bad path.'.cyan, () =>
+			chai
+				.request(app)
+				.get('/bad/path')
+				.then((response) => {
+					expect(response).to.be.json;
+					expect(response).to.have.status(404);
+					expect(response).to.be.an('object');
+					expect(response.body).to.have.keys(
+						'status',
+						'message');
+					expect(response.body.status).to.equal(404);
+					expect(response.body.message).to.equal('Not Found');
+				}));
+	});
 });

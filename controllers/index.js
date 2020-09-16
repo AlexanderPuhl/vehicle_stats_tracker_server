@@ -1,3 +1,5 @@
+'use strict';
+
 const userController = require('./userController');
 const vehicleController = require('./vehicleController');
 const fuelController = require('./fuelPurchaseController');

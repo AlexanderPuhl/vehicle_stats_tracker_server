@@ -2,8 +2,8 @@
 
 const userFieldSizes = {
 	username: { min: 1, max: 35 },
-	password: { min: 10, max: 72 },
-	email: { min: 1, max: 70 },
+	password: { min: 8, max: 72 },
+	email: { min: 3, max: 70 },
 	name: { min: 1, max: 70 }
 };
 

@@ -1,29 +1,5 @@
 'use strict';
 
-function detectInvalidIntField(validNumberList, requestBody) {
-	return validNumberList.find(
-		(field) => field in requestBody && typeof requestBody[field] !== 'number',
-	);
-}
-
-function gatherIntFieldsFromBody(reqBody) {
-	const intFields = {}
-	for (const [key, value] of Object.entries(reqBody)) {
-		if (typeof (value) === 'number') {
-			intFields[key] = value;
-		}
-	}
-	return intFields;
-}
-
-function detectNegativeInt(intFieldsFromBody) {
-	for (const [key, value] of Object.entries(intFieldsFromBody)) {
-		if (value <= 0) {
-			return key
-		}
-	}
-}
-
 function detectInvalidStringField(validStringList, requestBody) {
 	return validStringList.find(
 		(field) => field in requestBody && typeof requestBody[field] !== 'string',
@@ -63,13 +39,37 @@ function detectStringTooLarge(fieldSizes, stringFieldsFromBody) {
 	);
 }
 
+function detectInvalidIntField(validNumberList, requestBody) {
+	return validNumberList.find(
+		(field) => field in requestBody && typeof requestBody[field] !== 'number',
+	);
+}
+
+function gatherIntFieldsFromBody(reqBody) {
+	const intFields = {}
+	for (const [key, value] of Object.entries(reqBody)) {
+		if (typeof (value) === 'number') {
+			intFields[key] = value;
+		}
+	}
+	return intFields;
+}
+
+function detectNegativeInt(intFieldsFromBody) {
+	for (const [key, value] of Object.entries(intFieldsFromBody)) {
+		if (value <= 0) {
+			return key
+		}
+	}
+}
+
 module.exports = {
-	detectInvalidIntField,
-	detectNegativeInt,
-	gatherIntFieldsFromBody,
 	detectInvalidStringField,
 	gatherStringFieldsFromBody,
 	detectNonTrimmedStrings,
 	detectStringTooSmall,
-	detectStringTooLarge
+	detectStringTooLarge,
+	detectInvalidIntField,
+	gatherIntFieldsFromBody,
+	detectNegativeInt
 };
