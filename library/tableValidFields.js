@@ -14,6 +14,7 @@ const vehicleValidFields = [
 	'vehicle_year',
 	'type_id',
 	'make_id',
+	'model_id',
 	'sub_model_id',
 	'transmission_id',
 	'drive_type_id',
@@ -25,7 +26,7 @@ const vehicleValidFields = [
 	'oil_change_frequency',
 	'default_energy_type_id',
 	'default_fuel_grade_id',
-	'notes'
+	'note'
 ];
 
 const fuelPurchaseValidFields = [

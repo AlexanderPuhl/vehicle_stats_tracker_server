@@ -25,7 +25,7 @@ const vehicleUpdateableFields = [
 	'oil_change_frequency',
 	'default_energy_type_id',
 	'default_fuel_grade_id',
-	'notes'
+	'note'
 ];
 
 const fuelPurchaseUpdateableFields = [

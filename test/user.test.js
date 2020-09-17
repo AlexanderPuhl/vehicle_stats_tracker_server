@@ -5,7 +5,6 @@ const chai = require('chai');
 const expect = chai.expect;
 const chaiHttp = require('chai-http');
 const jwt = require('jsonwebtoken');
-const colors = require('colors');
 
 const server = require('../server');
 const knex = require('../db/knex');
@@ -14,7 +13,7 @@ const { userController } = require('../controllers');
 
 chai.use(chaiHttp);
 
-describe.only('Users API Resources'.cyan.bold.underline, () => {
+describe('Users API Resources'.cyan.bold.underline, () => {
 	let authToken = '';
 	const jwtPayload = {
 		user_id: 1,
@@ -22,6 +21,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 		email: 'demo@demo.com',
 		iat: Date.now()
 	};
+	const validUser = { username: 'demo', password: 'thinkful123' };
 	const name = 'testName';
 	const email = 'test@test.com';
 	const username = 'testUsername';
@@ -30,9 +30,6 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 	beforeEach(() => knex.migrate.rollback()
 		.then(() => knex.migrate.latest())
 		.then(() => knex.seed.run())
-		.then(async () => {
-			validUser = await userController.findOne('demo');
-		})
 		.then(() => {
 			authToken = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: JWT_EXPIRATION, algorithm: 'HS256' });
 		})
@@ -43,7 +40,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 	describe('api/users'.cyan.bold, () => {
 		describe('POST'.yellow, () => {
 			it('Should create a new user'.cyan, async () => {
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username,
@@ -53,7 +50,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(201);
 				expect(response.body).to.be.an('object');
@@ -67,29 +64,29 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 					'reset_token',
 					'reset_token_expiration');
 				expect(response.body.user_id).to.exist;
-				expect(response.body.name).to.equal(testUser.name);
-				expect(response.body.email).to.equal(testUser.email);
-				expect(response.body.username).to.equal(testUser.username);
+				expect(response.body.name).to.equal(newUser.name);
+				expect(response.body.email).to.equal(newUser.email);
+				expect(response.body.username).to.equal(newUser.username);
 				expect(response.body.onboarding).to.equal(true);
 				expect(response.body.selected_vehicle_id).to.equal(0);
 				expect(response.body.reset_token).to.equal(null);
-				expect(response.body.reset_token).to.equal(null);
+				expect(response.body.reset_token_expiration).to.equal(null);
 				const user = await userController.findOne(username);
 				expect(user).to.exist;
 				expect(user.user_id).to.equal(response.body.user_id);
-				expect(user.name).to.equal(testUser.name);
-				expect(user.email).to.equal(testUser.email);
-				expect(user.username).to.equal(testUser.username);
+				expect(user.name).to.equal(newUser.name);
+				expect(user.email).to.equal(newUser.email);
+				expect(user.username).to.equal(newUser.username);
 				expect(user.onboarding).to.equal(response.body.onboarding);
 				expect(user.selected_vehicle_id).to.equal(response.body.selected_vehicle_id);
 				expect(user.reset_token).to.equal(response.body.reset_token);
 				expect(user.reset_token_expiration).to.equal(response.body.reset_token_expiration);
-				const isValid = await bcrypt.compare(testUser.password, user.password);
+				const isValid = await bcrypt.compare(newUser.password, user.password);
 				expect(isValid).to.be.true;
 			});
 
 			it('Should reject users with duplicate username.'.cyan, async () => {
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username,
@@ -98,11 +95,11 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(400);
 				expect(response.body).to.be.an('object');
@@ -113,7 +110,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 			it('Should reject users with an invalid field.'.cyan, async () => {
 				const invalidField = 'invalidField';
-				const testUser = {
+				const newUser = {
 					invalidField,
 					name,
 					email,
@@ -123,7 +120,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -133,11 +130,11 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			})
 
 			it('Should reject users when a required field is missing.'.cyan, async () => {
-				const testUser = { name, email, password };
+				const newUser = { name, email, password };
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -148,7 +145,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 			it('Should reject users when a string field is not a string.'.cyan, async () => {
 				const nonStringUserName = 456;
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username: nonStringUserName,
@@ -157,7 +154,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -166,9 +163,9 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'username' must be a string.`);
 			});
 
-			it('Should reject users when a string field is not trimmed.'.cyan, async () => {
+			it('Should reject users when a field starts or ends with whitespaces.'.cyan, async () => {
 				const nonTrimmedUsername = '   user';
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username: nonTrimmedUsername,
@@ -177,7 +174,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -186,9 +183,9 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'username' cannot start or end with a whitespace.`);
 			});
 
-			it('Should reject users with empty string field.'.cyan, async () => {
+			it('Should reject a vehicle when a field doens\'t have at least 1 character.'.cyan, async () => {
 				const emptyUsername = '';
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username: emptyUsername,
@@ -197,7 +194,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -206,9 +203,29 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'username' must be at least 1 character long.`);
 			});
 
+			it('Should reject users when the email isn\'t at least 3 characters long'.cyan, async () => {
+				const emailTooSmall = 'a';
+				const newUser = {
+					name,
+					email: emailTooSmall,
+					username,
+					password,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'email' must be at least 3 characters long.`);
+			});
+
 			it('Should reject users with password less than 8 characters.'.cyan, async () => {
 				const smallPassword = '1234567';
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username,
@@ -217,7 +234,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -228,7 +245,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 			it('Should reject users with password greater than 72 characters.'.cyan, async () => {
 				const longPassword = 'a'.repeat(73);
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username,
@@ -237,7 +254,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -246,29 +263,9 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'password' must be at most 72 characters long.`);
 			});
 
-			it('Should reject users when the email isn\'t at least 3 characters long'.cyan, async () => {
-				const emailTooSmall = 'a';
-				const testUser = {
-					name,
-					email: emailTooSmall,
-					username,
-					password,
-				};
-				const response = await chai
-					.request(server)
-					.post('/api/user/create')
-					.send(testUser);
-				expect(response).to.be.json;
-				expect(response).to.have.status(422);
-				expect(response.body).to.be.an('object');
-				expect(response.body).to.include.keys('status', 'message');
-				expect(response.body.status).to.equal(422);
-				expect(response.body.message).to.equal(`Field: 'email' must be at least 3 characters long.`);
-			});
-
 			it('Should reject users when a number field is not a number.'.cyan, async () => {
 				const nonIntField = 'nonIntField';
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username,
@@ -278,7 +275,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -289,7 +286,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 			it('Should reject users when a number field is not a positive number.'.cyan, async () => {
 				const negativeInt = -5;
-				const testUser = {
+				const newUser = {
 					name,
 					email,
 					username,
@@ -299,7 +296,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				const response = await chai
 					.request(server)
 					.post('/api/user/create')
-					.send(testUser);
+					.send(newUser);
 				expect(response).to.be.json;
 				expect(response).to.have.status(422);
 				expect(response.body).to.be.an('object');
@@ -312,7 +309,6 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 		describe('PUT'.blue, () => {
 			it('Should update a users name value.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
 					name: 'AlphaOMEGA!!!'
 				};
@@ -350,9 +346,8 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			});
 
 			it('Should update a users onboarding value.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
-					onboarding: false,
+					onboarding: false
 				};
 				const response = await chai
 					.request(server)
@@ -388,7 +383,6 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			});
 
 			it('Should update a users selectedVehicle value.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
 					selected_vehicle_id: 2,
 				};
@@ -427,7 +421,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 			it('Should reject an update if the jwt token is missing.'.cyan, async () => {
 				const updateData = {
-					onboarding: false,
+					onboarding: false
 				};
 				const response = await chai
 					.request(server)
@@ -446,7 +440,7 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			it('Should reject an update if the jwt token is invalid.'.cyan, async () => {
 				const authToken = 'invalid';
 				const updateData = {
-					onboarding: false,
+					onboarding: false
 				};
 				const response = await chai
 					.request(server)
@@ -463,9 +457,8 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			});
 
 			it('Should reject an update if a field is invalid.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
-					fake: 'fake',
+					fake: 'fake'
 				};
 				const loginResponse = await chai
 					.request(server)
@@ -490,9 +483,8 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			});
 
 			it('Should reject an update if a field is not updatable.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
-					username: 'fake',
+					username: 'fake'
 				};
 				const loginResponse = await chai
 					.request(server)
@@ -517,9 +509,8 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			});
 
 			it('Should reject an update if a string field is not a string.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
-					name: -5,
+					name: -5
 				};
 				const loginResponse = await chai
 					.request(server)
@@ -543,10 +534,9 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`Field: 'name' must be a string.`);
 			});
 
-			it('Should reject an update if a string has leading or hanging white space.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
+			it('Should reject an update if a string starts or ends with white spaces.'.cyan, async () => {
 				const updateData = {
-					name: '    test Name',
+					name: '    test Name'
 				};
 				const loginResponse = await chai
 					.request(server)
@@ -571,9 +561,8 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			});
 
 			it('Should reject an update if a string doesn\'t have the minimun number of characters.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
-					email: 'a',
+					email: 'a'
 				};
 				const loginResponse = await chai
 					.request(server)
@@ -599,9 +588,8 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 			it('Should reject an update if a string exceeds the maximum number of characters.'.cyan, async () => {
 				const longName = 'a'.repeat(71);
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
-					name: longName,
+					name: longName
 				};
 				const loginResponse = await chai
 					.request(server)
@@ -626,9 +614,8 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			});
 
 			it('Should reject an update if a number field is not a number.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
-					selected_vehicle_id: 'not a Number',
+					selected_vehicle_id: 'not a Number'
 				};
 				const loginResponse = await chai
 					.request(server)
@@ -653,9 +640,8 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 			});
 
 			it('Should reject an update if a number field is not a positive number.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const updateData = {
-					selected_vehicle_id: -5,
+					selected_vehicle_id: -5
 				};
 				const loginResponse = await chai
 					.request(server)
@@ -683,7 +669,6 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 		describe('DELETE'.red, () => {
 			it('Should delete a user with a valid JWT Token.'.cyan, async () => {
-				const validUser = { username: 'demo', password: 'thinkful123' };
 				const loginResponse = await chai
 					.request(server)
 					.post('/api/user/login/')
@@ -734,5 +719,4 @@ describe.only('Users API Resources'.cyan.bold.underline, () => {
 
 		});
 	});
-
 });
