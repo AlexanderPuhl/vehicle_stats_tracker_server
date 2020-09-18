@@ -286,7 +286,7 @@ exports.deleteUser = async (req, res, next) => {
 		const { rowCount } = await pg.query('DELETE FROM public.user WHERE user_id = $1', [user_id]);
 		if (rowCount === 1) {
 			res
-				.status(200)
+				.status(204)
 				.json({ message: 'User account deleted.' });
 		}
 	} catch (error) {

@@ -9,13 +9,15 @@ const { NODE_ENV } = require('../config');
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe('Environment'.cyan.bold, () => {
-	it(`Node_ENV should be 'test'.`.cyan, () => {
-		expect(NODE_ENV).to.equal('test');
-	});
-});
+
 
 describe('Basic Express setup'.cyan.bold.underline, () => {
+	describe('Environment'.cyan.bold, () => {
+		it(`Node_ENV should be 'test'.`.cyan, () => {
+			expect(NODE_ENV).to.equal('test');
+		});
+	});
+	
 	describe('404 handler'.cyan.bold, () => {
 		it('should respond with 404 when given a bad path.'.cyan, () =>
 			chai

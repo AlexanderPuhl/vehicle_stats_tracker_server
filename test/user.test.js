@@ -39,75 +39,6 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 
 	describe('api/users'.cyan.bold, () => {
 		describe('POST'.yellow, () => {
-			it('Should create a new user'.cyan, async () => {
-				const newUser = {
-					name,
-					email,
-					username,
-					password,
-				};
-
-				const response = await chai
-					.request(server)
-					.post('/api/user/create')
-					.send(newUser);
-				expect(response).to.be.json;
-				expect(response).to.have.status(201);
-				expect(response.body).to.be.an('object');
-				expect(response.body).to.have.keys(
-					'user_id',
-					'name',
-					'email',
-					'username',
-					'onboarding',
-					'selected_vehicle_id',
-					'reset_token',
-					'reset_token_expiration');
-				expect(response.body.user_id).to.exist;
-				expect(response.body.name).to.equal(newUser.name);
-				expect(response.body.email).to.equal(newUser.email);
-				expect(response.body.username).to.equal(newUser.username);
-				expect(response.body.onboarding).to.equal(true);
-				expect(response.body.selected_vehicle_id).to.equal(0);
-				expect(response.body.reset_token).to.equal(null);
-				expect(response.body.reset_token_expiration).to.equal(null);
-				const user = await userController.findOne(username);
-				expect(user).to.exist;
-				expect(user.user_id).to.equal(response.body.user_id);
-				expect(user.name).to.equal(newUser.name);
-				expect(user.email).to.equal(newUser.email);
-				expect(user.username).to.equal(newUser.username);
-				expect(user.onboarding).to.equal(response.body.onboarding);
-				expect(user.selected_vehicle_id).to.equal(response.body.selected_vehicle_id);
-				expect(user.reset_token).to.equal(response.body.reset_token);
-				expect(user.reset_token_expiration).to.equal(response.body.reset_token_expiration);
-				const isValid = await bcrypt.compare(newUser.password, user.password);
-				expect(isValid).to.be.true;
-			});
-
-			it('Should reject users with duplicate username.'.cyan, async () => {
-				const newUser = {
-					name,
-					email,
-					username,
-					password,
-				};
-				await chai
-					.request(server)
-					.post('/api/user/create')
-					.send(newUser);
-				const response = await chai
-					.request(server)
-					.post('/api/user/create')
-					.send(newUser);
-				expect(response).to.be.json;
-				expect(response).to.have.status(400);
-				expect(response.body).to.be.an('object');
-				expect(response.body).to.include.keys('status', 'message');
-				expect(response.body.status).to.equal(400);
-				expect(response.body.message).to.equal('The username or email already exists.');
-			});
-
 			it('Should reject users with an invalid field.'.cyan, async () => {
 				const invalidField = 'invalidField';
 				const newUser = {
@@ -305,120 +236,77 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'selected_vehicle_id' must be a positive number.`);
 			});
 
+			it('Should reject users with duplicate username.'.cyan, async () => {
+				const newUser = {
+					name,
+					email,
+					username,
+					password,
+				};
+				await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(400);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(400);
+				expect(response.body.message).to.equal('The username or email already exists.');
+			});
+
+			it('Should create a new user'.cyan, async () => {
+				const newUser = {
+					name,
+					email,
+					username,
+					password,
+				};
+
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(201);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.have.keys(
+					'user_id',
+					'name',
+					'email',
+					'username',
+					'onboarding',
+					'selected_vehicle_id',
+					'reset_token',
+					'reset_token_expiration');
+				expect(response.body.user_id).to.exist;
+				expect(response.body.name).to.equal(newUser.name);
+				expect(response.body.email).to.equal(newUser.email);
+				expect(response.body.username).to.equal(newUser.username);
+				expect(response.body.onboarding).to.equal(true);
+				expect(response.body.selected_vehicle_id).to.equal(0);
+				expect(response.body.reset_token).to.equal(null);
+				expect(response.body.reset_token_expiration).to.equal(null);
+				const user = await userController.findOne(username);
+				expect(user).to.exist;
+				expect(user.user_id).to.equal(response.body.user_id);
+				expect(user.name).to.equal(newUser.name);
+				expect(user.email).to.equal(newUser.email);
+				expect(user.username).to.equal(newUser.username);
+				expect(user.onboarding).to.equal(response.body.onboarding);
+				expect(user.selected_vehicle_id).to.equal(response.body.selected_vehicle_id);
+				expect(user.reset_token).to.equal(response.body.reset_token);
+				expect(user.reset_token_expiration).to.equal(response.body.reset_token_expiration);
+				const isValid = await bcrypt.compare(newUser.password, user.password);
+				expect(isValid).to.be.true;
+			});
 		});
 
 		describe('PUT'.blue, () => {
-			it('Should update a users name value.'.cyan, async () => {
-				const updateData = {
-					name: 'AlphaOMEGA!!!'
-				};
-				const response = await chai
-					.request(server)
-					.post('/api/user/login/')
-					.send(validUser);
-				expect(response).to.be.json;
-				expect(response).to.have.status(200);
-				expect(response.body).to.be.an('object');
-				expect(response.body).to.include.keys('authToken');
-				const authToken = response.body.authToken;
-				const response_2 = await chai
-					.request(server)
-					.put('/api/user')
-					.set('authorization', 'Bearer ' + authToken)
-					.send(updateData);
-				expect(response).to.be.json;
-				expect(response_2).to.have.status(200);
-				expect(response_2.body).to.be.an('object');
-				expect(response_2.body).to.include.keys(
-					'user_id',
-					'username',
-					'email',
-					'name',
-					'selected_vehicle_id',
-					'onboarding',
-					'created_on',
-					'last_login',
-					'modified_on',
-					'reset_token',
-					'reset_token_expiration');
-				expect(response_2.body.username).to.equal(validUser.username);
-				expect(response_2.body.name).to.equal(updateData.name);
-			});
-
-			it('Should update a users onboarding value.'.cyan, async () => {
-				const updateData = {
-					onboarding: false
-				};
-				const response = await chai
-					.request(server)
-					.post('/api/user/login/')
-					.send(validUser);
-				expect(response).to.be.json;
-				expect(response).to.have.status(200);
-				expect(response.body).to.be.an('object');
-				expect(response.body).to.include.keys('authToken');
-				const authToken = response.body.authToken;
-				const response_2 = await chai
-					.request(server)
-					.put('/api/user')
-					.set('authorization', 'Bearer ' + authToken)
-					.send(updateData);
-				expect(response).to.be.json;
-				expect(response_2).to.have.status(200);
-				expect(response_2.body).to.be.an('object');
-				expect(response_2.body).to.include.keys(
-					'user_id',
-					'username',
-					'email',
-					'name',
-					'selected_vehicle_id',
-					'onboarding',
-					'created_on',
-					'last_login',
-					'modified_on',
-					'reset_token',
-					'reset_token_expiration');
-				expect(response_2.body.username).to.equal(validUser.username);
-				expect(response_2.body.onboarding).to.equal(updateData.onboarding);
-			});
-
-			it('Should update a users selectedVehicle value.'.cyan, async () => {
-				const updateData = {
-					selected_vehicle_id: 2,
-				};
-				const response = await chai
-					.request(server)
-					.post('/api/user/login')
-					.send(validUser);
-				expect(response).to.be.json;
-				expect(response).to.have.status(200);
-				expect(response.body).to.be.an('object');
-				expect(response.body).to.include.keys('authToken');
-				const authToken = response.body.authToken;
-				const response_2 = await chai
-					.request(server)
-					.put('/api/user')
-					.set('authorization', 'Bearer ' + authToken)
-					.send(updateData);
-				expect(response).to.be.json;
-				expect(response_2).to.have.status(200);
-				expect(response_2.body).to.be.an('object');
-				expect(response_2.body).to.include.keys(
-					'user_id',
-					'username',
-					'email',
-					'name',
-					'selected_vehicle_id',
-					'onboarding',
-					'created_on',
-					'last_login',
-					'modified_on',
-					'reset_token',
-					'reset_token_expiration');
-				expect(response_2.body.username).to.equal(validUser.username);
-				expect(response_2.body.selectedVehicle).to.equal(updateData.selectedVehicle);
-			});
-
 			it('Should reject an update if the jwt token is missing.'.cyan, async () => {
 				const updateData = {
 					onboarding: false
@@ -665,31 +553,120 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`Field: 'selected_vehicle_id' must be a positive number.`);
 			});
 
-		});
-
-		describe('DELETE'.red, () => {
-			it('Should delete a user with a valid JWT Token.'.cyan, async () => {
-				const loginResponse = await chai
+			it('Should update a users name value.'.cyan, async () => {
+				const updateData = {
+					name: 'AlphaOMEGA!!!'
+				};
+				const response = await chai
 					.request(server)
 					.post('/api/user/login/')
 					.send(validUser);
-				expect(loginResponse).to.be.json;
-				expect(loginResponse).to.have.status(200);
-				expect(loginResponse.body).to.be.an('object');
-				expect(loginResponse.body).to.include.keys('authToken');
-				const authToken = loginResponse.body.authToken;
-				const deleteResponse = await chai
+				expect(response).to.be.json;
+				expect(response).to.have.status(200);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('authToken');
+				const authToken = response.body.authToken;
+				const response_2 = await chai
 					.request(server)
-					.delete('/api/user')
+					.put('/api/user')
 					.set('authorization', 'Bearer ' + authToken)
-				expect(deleteResponse).to.be.json;
-				expect(deleteResponse).to.have.status(200);
-				expect(deleteResponse.body).to.be.an('object');
-				expect(deleteResponse.body).to.include.keys('message');
-				expect(deleteResponse.body.message).to.equal(`User account deleted.`);
+					.send(updateData);
+				expect(response).to.be.json;
+				expect(response_2).to.have.status(200);
+				expect(response_2.body).to.be.an('object');
+				expect(response_2.body).to.include.keys(
+					'user_id',
+					'username',
+					'email',
+					'name',
+					'selected_vehicle_id',
+					'onboarding',
+					'created_on',
+					'last_login',
+					'modified_on',
+					'reset_token',
+					'reset_token_expiration');
+				expect(response_2.body.username).to.equal(validUser.username);
+				expect(response_2.body.name).to.equal(updateData.name);
 			});
 
-			it('Should return a 401 if the JWT token is invalid.'.cyan, async () => {
+			it('Should update a users onboarding value.'.cyan, async () => {
+				const updateData = {
+					onboarding: false
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/login/')
+					.send(validUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(200);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('authToken');
+				const authToken = response.body.authToken;
+				const response_2 = await chai
+					.request(server)
+					.put('/api/user')
+					.set('authorization', 'Bearer ' + authToken)
+					.send(updateData);
+				expect(response).to.be.json;
+				expect(response_2).to.have.status(200);
+				expect(response_2.body).to.be.an('object');
+				expect(response_2.body).to.include.keys(
+					'user_id',
+					'username',
+					'email',
+					'name',
+					'selected_vehicle_id',
+					'onboarding',
+					'created_on',
+					'last_login',
+					'modified_on',
+					'reset_token',
+					'reset_token_expiration');
+				expect(response_2.body.username).to.equal(validUser.username);
+				expect(response_2.body.onboarding).to.equal(updateData.onboarding);
+			});
+
+			it('Should update a users selectedVehicle value.'.cyan, async () => {
+				const updateData = {
+					selected_vehicle_id: 2,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/login')
+					.send(validUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(200);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('authToken');
+				const authToken = response.body.authToken;
+				const response_2 = await chai
+					.request(server)
+					.put('/api/user')
+					.set('authorization', 'Bearer ' + authToken)
+					.send(updateData);
+				expect(response).to.be.json;
+				expect(response_2).to.have.status(200);
+				expect(response_2.body).to.be.an('object');
+				expect(response_2.body).to.include.keys(
+					'user_id',
+					'username',
+					'email',
+					'name',
+					'selected_vehicle_id',
+					'onboarding',
+					'created_on',
+					'last_login',
+					'modified_on',
+					'reset_token',
+					'reset_token_expiration');
+				expect(response_2.body.username).to.equal(validUser.username);
+				expect(response_2.body.selectedVehicle).to.equal(updateData.selectedVehicle);
+			});
+		});
+
+		describe('DELETE'.red, () => {
+			it('Should reject a delete if the JWT token is invalid.'.cyan, async () => {
 				const authToken = 'invalid-Token';
 				const response = await chai
 					.request(server)
@@ -704,7 +681,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.name).to.equal(`AuthenticationError`);
 			});
 
-			it('Should return a 401 if the jwt token is missing.'.cyan, async () => {
+			it('Should reject a delete if the jwt token is missing.'.cyan, async () => {
 				const response = await chai
 					.request(server)
 					.delete('/api/user')
@@ -717,6 +694,22 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.name).to.equal(`AuthenticationError`);
 			});
 
+			it('Should delete a user with a valid JWT Token.'.cyan, async () => {
+				const loginResponse = await chai
+					.request(server)
+					.post('/api/user/login/')
+					.send(validUser);
+				expect(loginResponse).to.be.json;
+				expect(loginResponse).to.have.status(200);
+				expect(loginResponse.body).to.be.an('object');
+				expect(loginResponse.body).to.include.keys('authToken');
+				const authToken = loginResponse.body.authToken;
+				const deleteResponse = await chai
+					.request(server)
+					.delete('/api/user')
+					.set('authorization', 'Bearer ' + authToken)
+				expect(deleteResponse).to.have.status(204);
+			});
 		});
 	});
 });

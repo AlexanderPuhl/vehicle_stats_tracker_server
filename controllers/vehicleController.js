@@ -42,8 +42,7 @@ exports.getOneVehicle = async (req, res, next) => {
 		const userId = req.user.user_id;
 		const { vehicleId } = req.params;
 		const { rows } = await pg.query('SELECT * FROM vehicle WHERE user_id = $1 AND vehicle_id = $2', [userId, vehicleId]);
-		const vehicle = rows[0];
-		res.status(200).json(vehicle);
+		res.status(200).json(rows);
 	} catch (error) {
 		next(error);
 	}
@@ -59,7 +58,7 @@ exports.createVehicle = async (req, res, next) => {
 		//CHECK TO MAKE SURE NO INVALID FIELDS ARE IN THE REQ.BODY
 		requestBodyKeys.forEach((key) => {
 			if (!vehicleValidFields.includes(key)) {
-				const error = new Error(`${key} is not a valid field.`);
+				const error = new Error(`'${key}' is not a valid field.`);
 				error.status = 422;
 				return next(error);
 			}
@@ -68,7 +67,7 @@ exports.createVehicle = async (req, res, next) => {
 		//CHECK TO MAKE SURE REQUIRED FIELDS ARE IN THE REQ.BODY
 		vehicleRequiredFields.forEach((field) => {
 			if (!requestBodyKeys.includes(field)) {
-				const error = new Error(`${field} is required.`);
+				const error = new Error(`'${field}' is required.`);
 				error.status = 422;
 				return next(error);
 			}
@@ -280,7 +279,7 @@ exports.deleteVehicle = async (req, res, next) => {
 
 		// //CHECK TO MAKE SURE VEHICLE_ID IS A NUMBER
 		if (isNaN(vehicleId)) {
-			const error = new Error(`Invalid vehicleId.`);
+			const error = new Error(`Invalid vehicle id.`);
 			error.status = 400;
 			return next(error);
 		}
@@ -288,11 +287,11 @@ exports.deleteVehicle = async (req, res, next) => {
 		const { rowCount } = await pg.query('DELETE FROM vehicle WHERE vehicle_id = $1', [vehicleId]);
 		if (rowCount === 1) {
 			res
-				.status(200)
+				.status(204)
 				.json({ message: 'Vehicle deleted.' });
 		} else {
 			const error = new Error(
-				`Could not find vehicle with vehicle_id: ${vehicleId}.`
+				`Could not find a vehicle with vehicle_id: ${vehicleId}.`
 			);
 			error.status = 406;
 			return next(error);
