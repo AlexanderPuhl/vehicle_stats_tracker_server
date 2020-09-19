@@ -313,7 +313,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				};
 				const response = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ')
 					.send(updateData);
 				expect(response).to.be.json;
@@ -332,7 +332,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				};
 				const response = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(response).to.be.json;
@@ -359,7 +359,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const updateResponse = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(updateResponse).to.be.json;
@@ -385,7 +385,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const updateResponse = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(updateResponse).to.be.json;
@@ -411,7 +411,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const updateResponse = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(updateResponse).to.be.json;
@@ -437,7 +437,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const updateResponse = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(updateResponse).to.be.json;
@@ -463,7 +463,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const updateResponse = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(updateResponse).to.be.json;
@@ -490,7 +490,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const updateResponse = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(updateResponse).to.be.json;
@@ -516,7 +516,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const updateResponse = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(updateResponse).to.be.json;
@@ -542,7 +542,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const updateResponse = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(updateResponse).to.be.json;
@@ -568,7 +568,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = response.body.authToken;
 				const response_2 = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(response).to.be.json;
@@ -605,7 +605,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = response.body.authToken;
 				const response_2 = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(response).to.be.json;
@@ -642,7 +642,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = response.body.authToken;
 				const response_2 = await chai
 					.request(server)
-					.put('/api/user')
+					.put('/api/user/update')
 					.set('authorization', 'Bearer ' + authToken)
 					.send(updateData);
 				expect(response).to.be.json;
@@ -670,7 +670,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = 'invalid-Token';
 				const response = await chai
 					.request(server)
-					.delete('/api/user')
+					.delete('/api/user/delete')
 					.set('authorization', 'Bearer ' + authToken)
 				expect(response).to.be.json;
 				expect(response).to.have.status(401);
@@ -684,7 +684,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 			it('Should reject a delete if the jwt token is missing.'.cyan, async () => {
 				const response = await chai
 					.request(server)
-					.delete('/api/user')
+					.delete('/api/user/delete')
 				expect(response).to.be.json;
 				expect(response).to.have.status(401);
 				expect(response.body).to.be.an('object');
@@ -706,7 +706,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				const authToken = loginResponse.body.authToken;
 				const deleteResponse = await chai
 					.request(server)
-					.delete('/api/user')
+					.delete('/api/user/delete')
 					.set('authorization', 'Bearer ' + authToken)
 				expect(deleteResponse).to.have.status(204);
 			});

@@ -17,7 +17,7 @@ describe('Basic Express setup'.cyan.bold.underline, () => {
 			expect(NODE_ENV).to.equal('test');
 		});
 	});
-	
+
 	describe('404 handler'.cyan.bold, () => {
 		it('should respond with 404 when given a bad path.'.cyan, () =>
 			chai

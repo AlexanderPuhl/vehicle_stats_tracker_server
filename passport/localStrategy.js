@@ -24,7 +24,12 @@ const verifyCallback = async (username, password, done) => {
 	let tempUser = {
 		user_id: user.user_id,
 		username: user.username,
-		email: user.email
+		email: user.email,
+		name: user.name,
+		selected_vehicle_id: user.selected_vehicle_id,
+		onboarding: user.onboarding,
+		reset_token: user.reset_token,
+		reset_token_expiration: user.reset_token_expiration
 	};
 	return done(null, tempUser);
 }

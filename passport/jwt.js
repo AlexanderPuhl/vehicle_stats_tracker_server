@@ -21,7 +21,12 @@ const verifyCallBack = async (payload, done) => {
 	const user = {
 		user_id: row.user_id,
 		username: row.username,
-		email: row.email
+		email: row.email,
+		name: row.name,
+		selected_vehicle_id: row.selected_vehicle_id,
+		onboarding: row.onboarding,
+		reset_token: row.reset_token,
+		reset_token_expiration: row.reset_token_expiration
 	};
 	return done(null, user);
 }
