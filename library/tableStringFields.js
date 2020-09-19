@@ -23,7 +23,7 @@ const fuelPurchaseStringFields = [
 ];
 
 module.exports = {
-		userStringFields,
-		vehicleStringFields,
-		fuelPurchaseStringFields
+	userStringFields,
+	vehicleStringFields,
+	fuelPurchaseStringFields
 };

@@ -51,10 +51,6 @@ app.use((err, req, res, next) => {
 	}
 });
 
-if (require.main === module) {
-	runServer();
-}
-
 function runServer(port = SERVER_PORT) {
 	const server = app
 		.listen(port, () => {
@@ -64,6 +60,10 @@ function runServer(port = SERVER_PORT) {
 			console.error('Express failed to start');
 			console.error(err);
 		});
+}
+
+if (require.main === module) {
+	runServer();
 }
 
 module.exports = app;
