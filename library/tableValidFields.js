@@ -10,7 +10,7 @@ const userValidFields = [
 ];
 
 const vehicleValidFields = [
-	'name',
+	'vehicle_name',
 	'vehicle_year',
 	'type_id',
 	'make_id',

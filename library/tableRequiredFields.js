@@ -5,7 +5,7 @@ const userRequiredFields = [
 ]
 
 const vehicleRequiredFields = [
-	'name'
+	'vehicle_name'
 ];
 
 const fuelPurchaseRequiredFields = [

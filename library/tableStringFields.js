@@ -8,7 +8,7 @@ const userStringFields = [
 ];
 
 const vehicleStringFields = [
-	'name',
+	'vehicle_name',
 	'vin',
 	'license_plate',
 	'insurance_number',

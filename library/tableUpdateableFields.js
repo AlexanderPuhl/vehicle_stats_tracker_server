@@ -9,7 +9,7 @@ const userUpdateableFields = [
 ]
 
 const vehicleUpdateableFields = [
-	'name',
+	'vehicle_name',
 	'vehicle_year',
 	'type_id',
 	'make_id',

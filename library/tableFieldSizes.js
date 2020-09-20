@@ -8,7 +8,7 @@ const userFieldSizes = {
 };
 
 const vehicleFieldSizes = {
-	name: { min: 1, max: 35 },
+	vehicle_name: { min: 1, max: 35 },
 	vin: { min: 1, max: 20 },
 	license_plate: { min: 1, max: 20 },
 	insurance_number: { min: 1, max: 50 },
