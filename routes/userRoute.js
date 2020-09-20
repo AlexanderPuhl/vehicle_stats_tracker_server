@@ -19,9 +19,9 @@ const jwtAuth = passport.authenticate('jwt', {
 	failWithError: true,
 });
 
+router.route('/create').post(userController.createUser);
 router.route('/login').post(localAuth, userController.loginUser);
 router.route('/refresh').post(jwtAuth, userController.refreshToken);
-router.route('/create').post(userController.createUser);
 router.route('/update').put(jwtAuth, userController.updateUser);
 router.route('/delete').delete(jwtAuth, userController.deleteUser);
 

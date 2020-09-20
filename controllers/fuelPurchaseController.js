@@ -27,7 +27,7 @@ const { fuelPurchaseFieldSizes } = require('../library/tableFieldSizes');
 exports.getAllFuelPurchases = async (req, res, next) => {
 	try {
 		const userId = req.user.user_id;
-		const { rows } = await pg.query('SELECT * FROM fuel_purchase WHERE user_id = $1 ORDER BY created_on', [userId]);
+		const { rows } = await pg.query('SELECT * FROM fuel_purchase WHERE user_id = $1 ORDER BY date_of_fill_up DESC', [userId]);
 		res.status(200).json(rows);
 	} catch (error) {
 		next(error);
