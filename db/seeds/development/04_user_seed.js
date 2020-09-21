@@ -8,7 +8,8 @@ exports.seed = function (knex) {
 				password: '$2a$10$tK/hrMfQoY7beKGzvPp78e7qLC/yjvDyTIwVZe13WSQzCXcXvzIkK',
 				email: 'demo@demo.com',
 				name: 'demo',
-				onboarding: false
+				onboarding: false,
+				selectedVehicle: 1
 			});
 		}).then(() => {
 			return knex('user').insert({
@@ -16,7 +17,8 @@ exports.seed = function (knex) {
 				password: '$2a$10$d0WAISKRzKrH3KyR79Hy5O.VwLBA7YDjwpX/iU3NdKNEOgX6Acopi',
 				email: 'alexpuhldeveloper@gmail.com',
 				name: 'Alex Puhl',
-				onboarding: true
+				onboarding: true,
+				selectedVehicle: 0
 			});
 		});
 };

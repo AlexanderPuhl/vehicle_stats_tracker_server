@@ -12,7 +12,7 @@ const vehicleFieldSizes = {
 	vin: { min: 1, max: 20 },
 	license_plate: { min: 1, max: 20 },
 	insurance_number: { min: 1, max: 50 },
-	notes: { min: 1, max: 255 }
+	note: { min: 1, max: 255 }
 };
 
 const fuelPurchaseFieldSizes = {

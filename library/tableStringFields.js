@@ -12,7 +12,7 @@ const vehicleStringFields = [
 	'vin',
 	'license_plate',
 	'insurance_number',
-	'notes'
+	'note'
 ];
 
 const fuelPurchaseStringFields = [

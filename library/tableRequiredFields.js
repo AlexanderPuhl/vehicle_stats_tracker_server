@@ -1,7 +1,10 @@
 'use strict';
 
 const userRequiredFields = [
-	'username', 'password', 'email', 'name'
+	'username',
+	'password',
+	'email',
+	'name'
 ]
 
 const vehicleRequiredFields = [

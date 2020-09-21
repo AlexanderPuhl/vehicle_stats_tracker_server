@@ -7,8 +7,8 @@ exports.up = function (knex) {
 		table.string('name', 70).notNullable
 		table.integer('selected_vehicle_id').defaultTo(0)
 		table.boolean('onboarding').defaultTo(true)
-		table.dateTime('created_on').defaultTo(knex.fn.now())
 		table.dateTime('last_login').defaultTo(knex.fn.now())
+		table.dateTime('created_on').defaultTo(knex.fn.now())
 		table.dateTime('modified_on').defaultTo(knex.fn.now())
 		table.string('reset_token', 255)
 		table.integer('reset_token_expiration')

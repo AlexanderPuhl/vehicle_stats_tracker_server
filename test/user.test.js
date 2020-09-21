@@ -60,7 +60,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`'invalidField' is not a valid field.`);
 			})
 
-			it('Should reject users when a required field is missing.'.cyan, async () => {
+			it('Should reject a new user if the username is missing.'.cyan, async () => {
 				const newUser = { name, email, password };
 				const response = await chai
 					.request(server)
@@ -74,13 +74,55 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Missing 'username' in request body.`);
 			});
 
-			it('Should reject users when a string field is not a string.'.cyan, async () => {
+			it('Should reject a new user if the password is missing.'.cyan, async () => {
+				const newUser = { username, name, email };
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Missing 'password' in request body.`);
+			});
+
+			it('Should reject a new user if the email is missing.'.cyan, async () => {
+				const newUser = { username, name, password };
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Missing 'email' in request body.`);
+			});
+
+			it('Should reject a new user if the name is missing.'.cyan, async () => {
+				const newUser = { username, email, password };
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Missing 'name' in request body.`);
+			});
+
+			it('Should reject a new user if the username is not a string.'.cyan, async () => {
 				const nonStringUserName = 456;
 				const newUser = {
-					name,
-					email,
 					username: nonStringUserName,
 					password,
+					email,
+					name,
 				};
 				const response = await chai
 					.request(server)
@@ -94,13 +136,73 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'username' must be a string.`);
 			});
 
-			it('Should reject users when a field starts or ends with whitespaces.'.cyan, async () => {
+			it('Should reject a new user if the password is not a string.'.cyan, async () => {
+				const nonStringUserName = 456;
+				const newUser = {
+					username,
+					password: nonStringUserName,
+					email,
+					name,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'password' must be a string.`);
+			});
+
+			it('Should reject a new user if the email is not a string.'.cyan, async () => {
+				const nonStringUserName = 456;
+				const newUser = {
+					username,
+					password,
+					email: nonStringUserName,
+					name,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'email' must be a string.`);
+			});
+
+			it('Should reject a new user if the name is not a string.'.cyan, async () => {
+				const nonStringUserName = 456;
+				const newUser = {
+					username,
+					password,
+					email,
+					name: nonStringUserName,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'name' must be a string.`);
+			});
+
+			it('Should reject users when a string field starts or ends with whitespaces.'.cyan, async () => {
 				const nonTrimmedUsername = '   user';
 				const newUser = {
-					name,
-					email,
 					username: nonTrimmedUsername,
 					password,
+					email,
+					name,
 				};
 				const response = await chai
 					.request(server)
@@ -114,13 +216,13 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'username' cannot start or end with a whitespace.`);
 			});
 
-			it('Should reject a vehicle when a field doens\'t have at least 1 character.'.cyan, async () => {
+			it('Should reject a new user if the username doens\'t have at least 1 character.'.cyan, async () => {
 				const emptyUsername = '';
 				const newUser = {
-					name,
-					email,
 					username: emptyUsername,
 					password,
+					email,
+					name,
 				};
 				const response = await chai
 					.request(server)
@@ -134,33 +236,13 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'username' must be at least 1 character long.`);
 			});
 
-			it('Should reject users when the email isn\'t at least 3 characters long'.cyan, async () => {
-				const emailTooSmall = 'a';
-				const newUser = {
-					name,
-					email: emailTooSmall,
-					username,
-					password,
-				};
-				const response = await chai
-					.request(server)
-					.post('/api/user/create')
-					.send(newUser);
-				expect(response).to.be.json;
-				expect(response).to.have.status(422);
-				expect(response.body).to.be.an('object');
-				expect(response.body).to.include.keys('status', 'message');
-				expect(response.body.status).to.equal(422);
-				expect(response.body.message).to.equal(`Field: 'email' must be at least 3 characters long.`);
-			});
-
-			it('Should reject users with password less than 8 characters.'.cyan, async () => {
+			it('Should reject a new user if the password doens\'t have at least 8 characters.'.cyan, async () => {
 				const smallPassword = '1234567';
 				const newUser = {
-					name,
-					email,
 					username,
 					password: smallPassword,
+					email,
+					name,
 				};
 				const response = await chai
 					.request(server)
@@ -174,13 +256,73 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'password' must be at least 8 characters long.`);
 			});
 
-			it('Should reject users with password greater than 72 characters.'.cyan, async () => {
+			it('Should reject a new user if the email doens\'t have at least 3 characters'.cyan, async () => {
+				const emailTooSmall = 'a';
+				const newUser = {
+					username,
+					password,
+					email: emailTooSmall,
+					name,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'email' must be at least 3 characters long.`);
+			});
+
+			it('Should reject a new user if the name doens\'t have at least 1 character'.cyan, async () => {
+				const emailTooSmall = 'a';
+				const newUser = {
+					username,
+					password,
+					email: emailTooSmall,
+					name,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'email' must be at least 3 characters long.`);
+			});
+
+			it('Should reject a new user if the username exceeds 35 characters.'.cyan, async () => {
+				const longPassword = 'a'.repeat(36);
+				const newUser = {
+					username: longPassword,
+					password,
+					email,
+					name,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'username' must be at most 35 characters long.`);
+			});
+
+			it('Should reject a new user if the password exceeds 72 characters.'.cyan, async () => {
 				const longPassword = 'a'.repeat(73);
 				const newUser = {
-					name,
-					email,
 					username,
 					password: longPassword,
+					email,
+					name,
 				};
 				const response = await chai
 					.request(server)
@@ -194,13 +336,53 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'password' must be at most 72 characters long.`);
 			});
 
-			it('Should reject users when a number field is not a number.'.cyan, async () => {
-				const nonIntField = 'nonIntField';
+			it('Should reject a new user if the email exceeds 70 characters.'.cyan, async () => {
+				const longPassword = 'a'.repeat(71);
 				const newUser = {
-					name,
-					email,
 					username,
 					password,
+					email: longPassword,
+					name,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'email' must be at most 70 characters long.`);
+			});
+
+			it('Should reject a new user if the name exceeds 70 characters.'.cyan, async () => {
+				const longPassword = 'a'.repeat(71);
+				const newUser = {
+					username,
+					password,
+					email,
+					name: longPassword,
+				};
+				const response = await chai
+					.request(server)
+					.post('/api/user/create')
+					.send(newUser);
+				expect(response).to.be.json;
+				expect(response).to.have.status(422);
+				expect(response.body).to.be.an('object');
+				expect(response.body).to.include.keys('status', 'message');
+				expect(response.body.status).to.equal(422);
+				expect(response.body.message).to.equal(`Field: 'name' must be at most 70 characters long.`);
+			});
+
+			it('Should reject a new user if the selected_vehicle_id is not a number.'.cyan, async () => {
+				const nonIntField = 'nonIntField';
+				const newUser = {
+					username,
+					password,
+					email,
+					name,
 					selected_vehicle_id: nonIntField
 				};
 				const response = await chai
@@ -215,13 +397,13 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.message).to.equal(`Field: 'selected_vehicle_id' must be a number.`);
 			});
 
-			it('Should reject users when a number field is not a positive number.'.cyan, async () => {
+			it('Should reject a new user if the selected_vehicle_id is not a positive number.'.cyan, async () => {
 				const negativeInt = -5;
 				const newUser = {
-					name,
-					email,
 					username,
 					password,
+					email,
+					name,
 					selected_vehicle_id: negativeInt
 				};
 				const response = await chai
@@ -238,10 +420,10 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 
 			it('Should reject users with duplicate username.'.cyan, async () => {
 				const newUser = {
-					name,
-					email,
 					username,
 					password,
+					email,
+					name,
 				};
 				await chai
 					.request(server)
@@ -261,10 +443,10 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 
 			it('Should create a new user'.cyan, async () => {
 				const newUser = {
-					name,
-					email,
 					username,
 					password,
+					email,
+					name,
 				};
 
 				const response = await chai
@@ -307,7 +489,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 		});
 
 		describe('PUT'.blue, () => {
-			it('Should reject an update if the jwt token is missing.'.cyan, async () => {
+			it('Should reject a user update if the jwt token is missing.'.cyan, async () => {
 				const updateData = {
 					onboarding: false
 				};
@@ -325,7 +507,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.name).to.equal('AuthenticationError');
 			});
 
-			it('Should reject an update if the jwt token is invalid.'.cyan, async () => {
+			it('Should reject a user update if the jwt token is invalid.'.cyan, async () => {
 				const authToken = 'invalid';
 				const updateData = {
 					onboarding: false
@@ -344,7 +526,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.name).to.equal('AuthenticationError');
 			});
 
-			it('Should reject an update if a field is invalid.'.cyan, async () => {
+			it('Should reject a user update if a field is invalid.'.cyan, async () => {
 				const updateData = {
 					fake: 'fake'
 				};
@@ -370,7 +552,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`'fake' is not a valid field.`);
 			});
 
-			it('Should reject an update if a field is not updatable.'.cyan, async () => {
+			it('Should reject a user update if an update on username is attempted.'.cyan, async () => {
 				const updateData = {
 					username: 'fake'
 				};
@@ -396,7 +578,59 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`'username' is not an updateable field.`);
 			});
 
-			it('Should reject an update if a string field is not a string.'.cyan, async () => {
+			it('Should reject a user update if the password is not a string.'.cyan, async () => {
+				const updateData = {
+					password: -5
+				};
+				const loginResponse = await chai
+					.request(server)
+					.post('/api/user/login/')
+					.send(validUser);
+				expect(loginResponse).to.be.json;
+				expect(loginResponse).to.have.status(200);
+				expect(loginResponse.body).to.be.an('object');
+				expect(loginResponse.body).to.include.keys('authToken');
+				const authToken = loginResponse.body.authToken;
+				const updateResponse = await chai
+					.request(server)
+					.put('/api/user/update')
+					.set('authorization', 'Bearer ' + authToken)
+					.send(updateData);
+				expect(updateResponse).to.be.json;
+				expect(updateResponse).to.have.status(422);
+				expect(updateResponse.body).to.be.an('object');
+				expect(updateResponse.body).to.include.keys('status', 'message');
+				expect(updateResponse.body.status).to.equal(422);
+				expect(updateResponse.body.message).to.equal(`Field: 'password' must be a string.`);
+			});
+
+			it('Should reject a user update if the email is not a string.'.cyan, async () => {
+				const updateData = {
+					email: -5
+				};
+				const loginResponse = await chai
+					.request(server)
+					.post('/api/user/login/')
+					.send(validUser);
+				expect(loginResponse).to.be.json;
+				expect(loginResponse).to.have.status(200);
+				expect(loginResponse.body).to.be.an('object');
+				expect(loginResponse.body).to.include.keys('authToken');
+				const authToken = loginResponse.body.authToken;
+				const updateResponse = await chai
+					.request(server)
+					.put('/api/user/update')
+					.set('authorization', 'Bearer ' + authToken)
+					.send(updateData);
+				expect(updateResponse).to.be.json;
+				expect(updateResponse).to.have.status(422);
+				expect(updateResponse.body).to.be.an('object');
+				expect(updateResponse.body).to.include.keys('status', 'message');
+				expect(updateResponse.body.status).to.equal(422);
+				expect(updateResponse.body.message).to.equal(`Field: 'email' must be a string.`);
+			});
+
+			it('Should reject a user update if the name is not a string.'.cyan, async () => {
 				const updateData = {
 					name: -5
 				};
@@ -422,7 +656,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`Field: 'name' must be a string.`);
 			});
 
-			it('Should reject an update if a string starts or ends with white spaces.'.cyan, async () => {
+			it('Should reject a user update if a string starts or ends with white spaces.'.cyan, async () => {
 				const updateData = {
 					name: '    test Name'
 				};
@@ -448,7 +682,33 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`Field: 'name' cannot start or end with a whitespace.`);
 			});
 
-			it('Should reject an update if a string doesn\'t have the minimun number of characters.'.cyan, async () => {
+			it('Should reject a user update if the password doesn\'t have at least 8 characters.'.cyan, async () => {
+				const updateData = {
+					password: '1234567'
+				};
+				const loginResponse = await chai
+					.request(server)
+					.post('/api/user/login/')
+					.send(validUser);
+				expect(loginResponse).to.be.json;
+				expect(loginResponse).to.have.status(200);
+				expect(loginResponse.body).to.be.an('object');
+				expect(loginResponse.body).to.include.keys('authToken');
+				const authToken = loginResponse.body.authToken;
+				const updateResponse = await chai
+					.request(server)
+					.put('/api/user/update')
+					.set('authorization', 'Bearer ' + authToken)
+					.send(updateData);
+				expect(updateResponse).to.be.json;
+				expect(updateResponse).to.have.status(422);
+				expect(updateResponse.body).to.be.an('object');
+				expect(updateResponse.body).to.include.keys('status', 'message');
+				expect(updateResponse.body.status).to.equal(422);
+				expect(updateResponse.body.message).to.equal(`Field: 'password' must be at least 8 characters long.`);
+			});
+
+			it('Should reject a user update if the email doesn\'t have at least 3 characters.'.cyan, async () => {
 				const updateData = {
 					email: 'a'
 				};
@@ -474,7 +734,87 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`Field: 'email' must be at least 3 characters long.`);
 			});
 
-			it('Should reject an update if a string exceeds the maximum number of characters.'.cyan, async () => {
+			it('Should reject a user update if the name doesn\'t have at least 1 character.'.cyan, async () => {
+				const updateData = {
+					name: ''
+				};
+				const loginResponse = await chai
+					.request(server)
+					.post('/api/user/login/')
+					.send(validUser);
+				expect(loginResponse).to.be.json;
+				expect(loginResponse).to.have.status(200);
+				expect(loginResponse.body).to.be.an('object');
+				expect(loginResponse.body).to.include.keys('authToken');
+				const authToken = loginResponse.body.authToken;
+				const updateResponse = await chai
+					.request(server)
+					.put('/api/user/update')
+					.set('authorization', 'Bearer ' + authToken)
+					.send(updateData);
+				expect(updateResponse).to.be.json;
+				expect(updateResponse).to.have.status(422);
+				expect(updateResponse.body).to.be.an('object');
+				expect(updateResponse.body).to.include.keys('status', 'message');
+				expect(updateResponse.body.status).to.equal(422);
+				expect(updateResponse.body.message).to.equal(`Field: 'name' must be at least 1 character long.`);
+			});
+
+			it('Should reject a user update if the password exceeds 72 characters.'.cyan, async () => {
+				const longName = 'a'.repeat(73);
+				const updateData = {
+					password: longName
+				};
+				const loginResponse = await chai
+					.request(server)
+					.post('/api/user/login/')
+					.send(validUser);
+				expect(loginResponse).to.be.json;
+				expect(loginResponse).to.have.status(200);
+				expect(loginResponse.body).to.be.an('object');
+				expect(loginResponse.body).to.include.keys('authToken');
+				const authToken = loginResponse.body.authToken;
+				const updateResponse = await chai
+					.request(server)
+					.put('/api/user/update')
+					.set('authorization', 'Bearer ' + authToken)
+					.send(updateData);
+				expect(updateResponse).to.be.json;
+				expect(updateResponse).to.have.status(422);
+				expect(updateResponse.body).to.be.an('object');
+				expect(updateResponse.body).to.include.keys('status', 'message');
+				expect(updateResponse.body.status).to.equal(422);
+				expect(updateResponse.body.message).to.equal(`Field: 'password' must be at most 72 characters long.`);
+			});
+
+			it('Should reject a user update if the email exceeds 70 characters.'.cyan, async () => {
+				const longName = 'a'.repeat(71);
+				const updateData = {
+					email: longName
+				};
+				const loginResponse = await chai
+					.request(server)
+					.post('/api/user/login/')
+					.send(validUser);
+				expect(loginResponse).to.be.json;
+				expect(loginResponse).to.have.status(200);
+				expect(loginResponse.body).to.be.an('object');
+				expect(loginResponse.body).to.include.keys('authToken');
+				const authToken = loginResponse.body.authToken;
+				const updateResponse = await chai
+					.request(server)
+					.put('/api/user/update')
+					.set('authorization', 'Bearer ' + authToken)
+					.send(updateData);
+				expect(updateResponse).to.be.json;
+				expect(updateResponse).to.have.status(422);
+				expect(updateResponse.body).to.be.an('object');
+				expect(updateResponse.body).to.include.keys('status', 'message');
+				expect(updateResponse.body.status).to.equal(422);
+				expect(updateResponse.body.message).to.equal(`Field: 'email' must be at most 70 characters long.`);
+			});
+
+			it('Should reject a user update if the name exceeds 70 characters.'.cyan, async () => {
 				const longName = 'a'.repeat(71);
 				const updateData = {
 					name: longName
@@ -501,7 +841,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`Field: 'name' must be at most 70 characters long.`);
 			});
 
-			it('Should reject an update if a number field is not a number.'.cyan, async () => {
+			it('Should reject a user update if the selected_vehicle_id is not a number.'.cyan, async () => {
 				const updateData = {
 					selected_vehicle_id: 'not a Number'
 				};
@@ -527,7 +867,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(updateResponse.body.message).to.equal(`Field: 'selected_vehicle_id' must be a number.`);
 			});
 
-			it('Should reject an update if a number field is not a positive number.'.cyan, async () => {
+			it('Should reject a user update if the selected_vehicle_id is not a positive number.'.cyan, async () => {
 				const updateData = {
 					selected_vehicle_id: -5
 				};
@@ -666,7 +1006,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 		});
 
 		describe('DELETE'.red, () => {
-			it('Should reject a delete if the JWT token is invalid.'.cyan, async () => {
+			it('Should reject a user delete if the JWT token is invalid.'.cyan, async () => {
 				const authToken = 'invalid-Token';
 				const response = await chai
 					.request(server)
@@ -681,7 +1021,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body.name).to.equal(`AuthenticationError`);
 			});
 
-			it('Should reject a delete if the jwt token is missing.'.cyan, async () => {
+			it('Should reject a user delete if the jwt token is missing.'.cyan, async () => {
 				const response = await chai
 					.request(server)
 					.delete('/api/user/delete')

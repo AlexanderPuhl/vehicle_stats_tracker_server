@@ -19,7 +19,7 @@ describe('Basic Express setup'.cyan.bold.underline, () => {
 	});
 
 	describe('404 handler'.cyan.bold, () => {
-		it('should respond with 404 when given a bad path.'.cyan, () =>
+		it('should respond with 404 if given a bad path.'.cyan, () =>
 			chai
 				.request(app)
 				.get('/bad/path')
