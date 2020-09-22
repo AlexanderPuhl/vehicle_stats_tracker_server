@@ -4,25 +4,14 @@ const bcrypt = require('bcryptjs');
 const knex = require('../db/knex');
 const pg = require('../db/pg');
 
-const { createAuthToken } = require('../library/jwtUtilities');
-
+const { userTableFields } = require('../library/tableFields');
+const { createAuthToken } = require('../utilities/jwtUtilities');
 const {
-	detectInvalidStringField,
-	gatherStringFieldsFromBody,
-	detectNonTrimmedStrings,
-	detectStringTooSmall,
-	detectStringTooLarge,
-	detectInvalidIntField,
-	gatherIntFieldsFromBody,
-	detectNegativeInt,
-} = require('../library/requestBodyUtilities');
+	validateRequestBody,
+	gatherTableUpdateableFields
+} = require('../utilities/requestBodyUtilities');
 
-const { userRequiredFields } = require('../library/tableRequiredFields')
-const { userUpdateableFields } = require('../library/tableUpdateableFields');
-const { userValidFields } = require('../library/tableValidFields');
-const { userStringFields } = require('../library/tableStringFields');
-const { userIntFields } = require('../library/tableIntFields');
-const { userFieldSizes } = require('../library/tableFieldSizes');
+const updateableUserFields = gatherTableUpdateableFields(userTableFields);
 
 // @desc Login a user
 // @route POST /api/user/login
@@ -45,83 +34,7 @@ exports.refreshToken = (req, res, next) => {
 // @access Public
 exports.createUser = async (req, res, next) => {
 	try {
-		const requestBodyKeys = Object.keys(req.body);
-
-		//CHECK TO MAKE SURE NO INVALID FIELDS ARE IN THE REQ.BODY
-		requestBodyKeys.forEach((key) => {
-			if (!userValidFields.includes(key)) {
-				const error = new Error(`'${key}' is not a valid field.`);
-				error.status = 422;
-				return next(error);
-			}
-		});
-
-		//CHECK TO MAKE SURE REQUIRED FIELDS ARE IN THE REQ.BODY
-		const missingField = userRequiredFields.find((field) => !(field in req.body));
-		if (missingField) {
-			const error = new Error(`Missing '${missingField}' in request body.`);
-			error.status = 422;
-			return next(error);
-		}
-
-		//CHECK TO MAKE SURE STRING FIELDS ARE ACTUALLY STRINGS
-		const invalidStringField = detectInvalidStringField(userStringFields, req.body);
-		if (invalidStringField) {
-			const error = new Error(`Field: '${invalidStringField}' must be a string.`);
-			error.status = 422;
-			return next(error);
-		}
-		const stringFieldsFromBody = gatherStringFieldsFromBody(req.body);
-
-		//CHECK TO MAKE SURE NO LEADING/HANGING WHITE SPACES ARE IN THE STRINGS
-		const nonTrimmedField = detectNonTrimmedStrings(userStringFields, stringFieldsFromBody)
-		if (nonTrimmedField) {
-			const error = new Error(
-				`Field: '${nonTrimmedField}' cannot start or end with a whitespace.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-
-		//CHECK TO MAKE SURE STRINGS HAVE THE MINIMUM AMOUNT OF CHARACTERS
-		const fieldTooSmall = detectStringTooSmall(userFieldSizes, stringFieldsFromBody);
-		if (fieldTooSmall) {
-			const { min } = userFieldSizes[fieldTooSmall];
-			const characterString = min === 1 ? 'character' : 'characters';
-			const error = new Error(
-				`Field: '${fieldTooSmall}' must be at least ${min} ${characterString} long.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-
-		//CHECK TO MAKE SURE STRINGS DON'T EXCEED MAXIMUM STRING LENGTH
-		const fieldTooLarge = detectStringTooLarge(userFieldSizes, stringFieldsFromBody);
-		if (fieldTooLarge) {
-			const { max } = userFieldSizes[fieldTooLarge];
-			const error = new Error(
-				`Field: '${fieldTooLarge}' must be at most ${max} characters long.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-
-		//CHECK TO MAKE SURE INT FIELDS ARE ACTUALLY NUMBERS
-		const nonIntField = detectInvalidIntField(userIntFields, req.body)
-		if (nonIntField) {
-			const error = new Error(`Field: '${nonIntField}' must be a number.`);
-			error.status = 422;
-			return next(error);
-		}
-		const intFieldsFromBody = gatherIntFieldsFromBody(req.body);
-
-		// //CHECK TO MAKE SURE INT FIELDS ARE POSITIVE NUMBERS
-		const negativeInt = detectNegativeInt(intFieldsFromBody);
-		if (negativeInt) {
-			const error = new Error(`Field: '${negativeInt}' must be a positive number.`);
-			error.status = 422;
-			return next(error);
-		}
+		validateRequestBody(req, userTableFields, next);
 
 		const {
 			username, password, email, name
@@ -163,95 +76,12 @@ exports.createUser = async (req, res, next) => {
 // @route POST /api/user/update
 // @access Private
 exports.updateUser = (req, res, next) => {
-	const requestBodyKeys = Object.keys(req.body);
-
-	//CHECK TO MAKE SURE NO INVALID FIELDS ARE IN THE REQ.BODY
-	requestBodyKeys.forEach((key) => {
-		if (!userValidFields.includes(key)) {
-			const error = new Error(`'${key}' is not a valid field.`);
-			error.status = 422;
-			return next(error);
-		}
-	});
-
-	//CHECK TO MAKE SURE UPDATEABLE FIELDS ARE IN THE REQ.BODY
-	requestBodyKeys.forEach((key) => {
-		if (!userUpdateableFields.includes(key)) {
-			const error = new Error(`'${key}' is not an updateable field.`);
-			error.status = 422;
-			return next(error);
-		}
-	});
-
-	//CHECK TO MAKE SURE STRING FIELDS ARE ACTUALLY STRINGS
-	const invalidStringField = detectInvalidStringField(userStringFields, req.body);
-	if (invalidStringField) {
-		const error = new Error(`Field: '${invalidStringField}' must be a string.`);
-		error.status = 422;
-		return next(error);
-	}
-	const stringFieldsFromBody = gatherStringFieldsFromBody(req.body);
-
-	//CHECK TO MAKE SURE NO LEADING/HANGING WHITE SPACES ARE IN THE STRINGS
-	if (JSON.stringify(stringFieldsFromBody) !== '{}') {
-		const nonTrimmedField = detectNonTrimmedStrings(userStringFields, stringFieldsFromBody)
-		if (nonTrimmedField) {
-			const error = new Error(
-				`Field: '${nonTrimmedField}' cannot start or end with a whitespace.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-	}
-
-	//CHECK TO MAKE SURE STRINGS HAVE THE MINIMUM AMOUNT OF CHARACTERS
-	if (JSON.stringify(stringFieldsFromBody) !== '{}') {
-		const fieldTooSmall = detectStringTooSmall(userFieldSizes, stringFieldsFromBody);
-		if (fieldTooSmall) {
-			const { min } = userFieldSizes[fieldTooSmall];
-			const characterString = min === 1 ? 'character' : 'characters';
-			const error = new Error(
-				`Field: '${fieldTooSmall}' must be at least ${min} ${characterString} long.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-	}
-
-	//CHECK TO MAKE SURE STRINGS DON'T EXCEED MAXIMUM STRING LENGTH
-	if (JSON.stringify(stringFieldsFromBody) !== '{}') {
-		const fieldTooLarge = detectStringTooLarge(userFieldSizes, stringFieldsFromBody);
-		if (fieldTooLarge) {
-			const { max } = userFieldSizes[fieldTooLarge];
-			const error = new Error(
-				`Field: '${fieldTooLarge}' must be at most ${max} characters long.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-	}
-
-	//CHECK TO MAKE SURE INT FIELDS ARE ACTUALLY NUMBERS
-	const nonIntField = detectInvalidIntField(userIntFields, req.body)
-	if (nonIntField) {
-		const error = new Error(`Field: '${nonIntField}' must be a number.`);
-		error.status = 422;
-		return next(error);
-	}
-	const intFieldsFromBody = gatherIntFieldsFromBody(req.body);
-
-	// //CHECK TO MAKE SURE INT FIELDS ARE POSITIVE NUMBERS
-	const negativeInt = detectNegativeInt(intFieldsFromBody);
-	if (negativeInt) {
-		const error = new Error(`Field: '${negativeInt}' must be a positive number.`);
-		error.status = 422;
-		return next(error);
-	}
+	validateRequestBody(req, userTableFields, next);
 
 	const userId = req.user.user_id;
 	const toUpdate = {};
 
-	userUpdateableFields.forEach((field) => {
+	updateableUserFields.forEach((field) => {
 		if (field in req.body) {
 			toUpdate[field] = req.body[field];
 		}

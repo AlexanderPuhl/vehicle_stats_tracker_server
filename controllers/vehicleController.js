@@ -3,23 +3,13 @@
 const knex = require('../db/knex');
 const pg = require('../db/pg');
 
+const { vehicleTableFields } = require('../library/tableFields');
 const {
-	detectInvalidStringField,
-	gatherStringFieldsFromBody,
-	detectNonTrimmedStrings,
-	detectStringTooSmall,
-	detectStringTooLarge,
-	detectInvalidIntField,
-	gatherIntFieldsFromBody,
-	detectNegativeInt,
-} = require('../library/requestBodyUtilities');
+	validateRequestBody,
+	gatherTableUpdateableFields
+} = require('../utilities/requestBodyUtilities');
 
-const { vehicleRequiredFields } = require('../library/tableRequiredFields');
-const { vehicleUpdateableFields } = require('../library/tableUpdateableFields');
-const { vehicleValidFields } = require('../library/tableValidFields');
-const { vehicleStringFields } = require('../library/tableStringFields');
-const { vehicleIntFields } = require('../library/tableIntFields');
-const { vehicleFieldSizes } = require('../library/tableFieldSizes');
+const updateableVehicleFields = gatherTableUpdateableFields(vehicleTableFields);
 
 // @desc Get all vehicles
 // @route Get /api/vehicle
@@ -53,85 +43,7 @@ exports.getOneVehicle = async (req, res, next) => {
 // @access Private
 exports.createVehicle = async (req, res, next) => {
 	try {
-		const requestBodyKeys = Object.keys(req.body);
-
-		//CHECK TO MAKE SURE NO INVALID FIELDS ARE IN THE REQ.BODY
-		requestBodyKeys.forEach((key) => {
-			if (!vehicleValidFields.includes(key)) {
-				const error = new Error(`'${key}' is not a valid field.`);
-				error.status = 422;
-				return next(error);
-			}
-		});
-
-		//CHECK TO MAKE SURE REQUIRED FIELDS ARE IN THE REQ.BODY
-		vehicleRequiredFields.forEach((field) => {
-			if (!requestBodyKeys.includes(field)) {
-				const error = new Error(`'${field}' is required.`);
-				error.status = 422;
-				return next(error);
-			}
-		});
-
-		//CHECK TO MAKE SURE STRING FIELDS ARE ACTUALLY STRINGS
-		const invalidStringField = detectInvalidStringField(vehicleStringFields, req.body);
-		if (invalidStringField) {
-			const error = new Error(`Field: '${invalidStringField}' must be a string.`);
-			error.status = 422;
-			return next(error);
-		}
-		const stringFieldsFromBody = gatherStringFieldsFromBody(req.body);
-
-		//CHECK TO MAKE SURE NO LEADING/HANGING WHITE SPACES ARE IN THE STRINGS
-		const nonTrimmedField = detectNonTrimmedStrings(vehicleStringFields, stringFieldsFromBody)
-
-		if (nonTrimmedField) {
-			const error = new Error(
-				`Field: '${nonTrimmedField}' cannot start or end with a whitespace.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-
-		//CHECK TO MAKE SURE STRINGS HAVE THE MINIMUM AMOUNT OF CHARACTERS
-		const fieldTooSmall = detectStringTooSmall(vehicleFieldSizes, stringFieldsFromBody);
-		if (fieldTooSmall) {
-			const { min } = vehicleFieldSizes[fieldTooSmall];
-			const characterString = min === 1 ? 'character' : 'characters';
-			const error = new Error(
-				`Field: '${fieldTooSmall}' must be at least ${min} ${characterString} long.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-
-		//CHECK TO MAKE SURE STRINGS DON'T EXCEED MAXIMUM STRING LENGTH
-		const fieldTooLarge = detectStringTooLarge(vehicleFieldSizes, stringFieldsFromBody);
-		if (fieldTooLarge) {
-			const { max } = vehicleFieldSizes[fieldTooLarge];
-			const error = new Error(
-				`Field: '${fieldTooLarge}' must be at most ${max} characters long.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-
-		//CHECK TO MAKE SURE INT FIELDS ARE ACTUALLY NUMBERS
-		const nonIntField = detectInvalidIntField(vehicleIntFields, req.body)
-		if (nonIntField) {
-			const error = new Error(`Field: '${nonIntField}' must be a number.`);
-			error.status = 422;
-			return next(error);
-		}
-		const intFieldsFromBody = gatherIntFieldsFromBody(req.body);
-
-		// //CHECK TO MAKE SURE INT FIELDS ARE POSITIVE NUMBERS
-		const negativeInt = detectNegativeInt(intFieldsFromBody);
-		if (negativeInt) {
-			const error = new Error(`Field: '${negativeInt}' must be a positive number.`);
-			error.status = 422;
-			return next(error);
-		}
+		validateRequestBody(req, vehicleTableFields, next);
 
 		const user_id = req.user.user_id;
 		const newVehicle = { user_id }
@@ -163,111 +75,41 @@ exports.createVehicle = async (req, res, next) => {
 // @route Put /api/vehicle/:vehicleId
 // @access Private
 exports.updateVehicle = (req, res, next) => {
-	const requestBodyKeys = Object.keys(req.body);
+	try {
+		validateRequestBody(req, vehicleTableFields, next);
 
-	//CHECK TO MAKE SURE UPDATEABLE FIELDS ARE IN THE REQ.BODY
-	requestBodyKeys.forEach((key) => {
-		if (!vehicleUpdateableFields.includes(key)) {
-			const error = new Error(`'${key}' is not an updateable field.`);
-			error.status = 422;
-			return next(error);
-		}
-	});
+		const userId = req.user.user_id;
+		const { vehicleId } = req.params;
+		const toUpdate = {};
 
-	//CHECK TO MAKE SURE STRING FIELDS ARE ACTUALLY STRINGS
-	const nonStringField = detectInvalidStringField(vehicleStringFields, req.body);
-	if (nonStringField) {
-		const error = new Error(`Field: '${nonStringField}' must be a string.`);
-		error.status = 422;
-		return next(error);
-	}
-	const stringFieldsFromBody = gatherStringFieldsFromBody(req.body);
-
-	//CHECK TO MAKE SURE NO LEADING/HANGING WHITE SPACES ARE IN THE STRINGS
-	if (JSON.stringify(stringFieldsFromBody) !== '{}') {
-		const nonTrimmedField = detectNonTrimmedStrings(vehicleStringFields, stringFieldsFromBody)
-		if (nonTrimmedField) {
-			const error = new Error(
-				`Field: '${nonTrimmedField}' cannot start or end with a whitespace.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-	}
-
-	//CHECK TO MAKE SURE STRINGS HAVE THE MINIMUM AMOUNT OF CHARACTERS
-	if (JSON.stringify(stringFieldsFromBody) !== '{}') {
-		const fieldTooSmall = detectStringTooSmall(vehicleFieldSizes, stringFieldsFromBody);
-		if (fieldTooSmall) {
-			const { min } = vehicleFieldSizes[fieldTooSmall];
-			const characterString = min === 1 ? 'character' : 'characters';
-			const error = new Error(
-				`Field: '${fieldTooSmall}' must be at least ${min} ${characterString} long.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-	}
-
-	//CHECK TO MAKE SURE STRINGS DON'T EXCEED MAXIMUM STRING LENGTH
-	if (JSON.stringify(stringFieldsFromBody) !== '{}') {
-		const fieldTooLarge = detectStringTooLarge(vehicleFieldSizes, stringFieldsFromBody);
-		if (fieldTooLarge) {
-			const { max } = vehicleFieldSizes[fieldTooLarge];
-			const error = new Error(
-				`Field: '${fieldTooLarge}' must be at most ${max} characters long.`,
-			);
-			error.status = 422;
-			return next(error);
-		}
-	}
-
-	//CHECK TO MAKE SURE INT FIELDS ARE ACTUALLY NUMBERS
-	const nonIntField = detectInvalidIntField(vehicleIntFields, req.body)
-	if (nonIntField) {
-		const error = new Error(`Field: '${nonIntField}' must be a number.`);
-		error.status = 422;
-		return next(error);
-	}
-	const intFieldsFromBody = gatherIntFieldsFromBody(req.body);
-
-	// //CHECK TO MAKE SURE INT FIELDS ARE POSITIVE NUMBERS
-	const negativeInt = detectNegativeInt(intFieldsFromBody);
-	if (negativeInt) {
-		const error = new Error(`Field: '${negativeInt}' must be a positive number.`);
-		error.status = 422;
-		return next(error);
-	}
-
-	const userId = req.user.user_id;
-	const { vehicleId } = req.params;
-	const toUpdate = {};
-
-	vehicleUpdateableFields.forEach((field) => {
-		if (field in req.body) {
-			toUpdate[field] = req.body[field];
-		}
-	});
-
-	toUpdate.modified_on = new Date(Date.now()).toISOString();
-
-	knex('vehicle')
-		.returning('*')
-		.where({
-			user_id: userId,
-			vehicle_id: vehicleId
-		})
-		.update(toUpdate)
-		.then(results => {
-			const result = results[0];
-			res
-				.status(200)
-				.location(`${req.originalUrl}/${result.fuel_purchase_id}`)
-				.json(result);
-		})
-		.catch(error => {
-			next(error);
+		updateableVehicleFields.forEach((field) => {
+			if (field in req.body) {
+				toUpdate[field] = req.body[field];
+			}
 		});
+
+		toUpdate.modified_on = new Date(Date.now()).toISOString();
+
+		knex('vehicle')
+			.returning('*')
+			.where({
+				user_id: userId,
+				vehicle_id: vehicleId
+			})
+			.update(toUpdate)
+			.then(results => {
+				const result = results[0];
+				res
+					.status(200)
+					.location(`${req.originalUrl}/${result.fuel_purchase_id}`)
+					.json(result);
+			})
+			.catch(error => {
+				next(error);
+			});
+	} catch (error) {
+		next(error);
+	}
 }
 
 // @desc Delete a vehicles

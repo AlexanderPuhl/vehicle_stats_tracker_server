@@ -71,7 +71,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body).to.be.an('object');
 				expect(response.body).to.include.keys('status', 'message');
 				expect(response.body.status).to.equal(422);
-				expect(response.body.message).to.equal(`Missing 'username' in request body.`);
+				expect(response.body.message).to.equal(`'username' is required.`);
 			});
 
 			it('Should reject a new user if the password is missing.'.cyan, async () => {
@@ -85,7 +85,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body).to.be.an('object');
 				expect(response.body).to.include.keys('status', 'message');
 				expect(response.body.status).to.equal(422);
-				expect(response.body.message).to.equal(`Missing 'password' in request body.`);
+				expect(response.body.message).to.equal(`'password' is required.`);
 			});
 
 			it('Should reject a new user if the email is missing.'.cyan, async () => {
@@ -99,7 +99,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body).to.be.an('object');
 				expect(response.body).to.include.keys('status', 'message');
 				expect(response.body.status).to.equal(422);
-				expect(response.body.message).to.equal(`Missing 'email' in request body.`);
+				expect(response.body.message).to.equal(`'email' is required.`);
 			});
 
 			it('Should reject a new user if the name is missing.'.cyan, async () => {
@@ -113,7 +113,7 @@ describe('Users API Resources'.cyan.bold.underline, () => {
 				expect(response.body).to.be.an('object');
 				expect(response.body).to.include.keys('status', 'message');
 				expect(response.body.status).to.equal(422);
-				expect(response.body.message).to.equal(`Missing 'name' in request body.`);
+				expect(response.body.message).to.equal(`'name' is required.`);
 			});
 
 			it('Should reject a new user if the username is not a string.'.cyan, async () => {
