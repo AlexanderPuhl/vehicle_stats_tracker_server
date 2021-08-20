@@ -1,3 +1,3 @@
-exports.seed = function (knex, Promise) {
-	return knex('country').del() // Deletes ALL existing entries
+exports.seed = function (knex) {
+  return knex('country').del();
 };
