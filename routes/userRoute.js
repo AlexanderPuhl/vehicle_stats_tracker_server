@@ -1,6 +1,5 @@
-'use strict';
-
 const express = require('express');
+
 const router = express.Router();
 const passport = require('passport');
 
@@ -10,13 +9,13 @@ const { userController } = require('../controllers');
 passport.use(jwtStrategy);
 
 const localAuth = passport.authenticate('local', {
-	session: false,
-	failWithError: true,
+  session: false,
+  failWithError: true,
 });
 
 const jwtAuth = passport.authenticate('jwt', {
-	session: false,
-	failWithError: true,
+  session: false,
+  failWithError: true,
 });
 
 router.route('/create').post(userController.createUser);
