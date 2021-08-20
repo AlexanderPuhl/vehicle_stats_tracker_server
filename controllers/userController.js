@@ -32,7 +32,10 @@ exports.refreshToken = (req, res, next) => {
 // @access Public
 exports.createUser = async (req, res, next) => {
   try {
-    validateRequestBody(req, userTableFields, next);
+    const error = validateRequestBody(req, userTableFields, next);
+    if (error instanceof Error) {
+      return next(error);
+    }
 
     const {
       username, password, email, name,
@@ -74,7 +77,10 @@ exports.createUser = async (req, res, next) => {
 // @route POST /api/user/update
 // @access Private
 exports.updateUser = (req, res, next) => {
-  validateRequestBody(req, userTableFields, next);
+  const error = validateRequestBody(req, userTableFields, next);
+    if (error instanceof Error) {
+      return next(error);
+    }
 
   const userId = req.user.user_id;
   const toUpdate = {};

@@ -41,7 +41,10 @@ exports.getOneVehicle = async (req, res, next) => {
 // @access Private
 exports.createVehicle = async (req, res, next) => {
   try {
-    validateRequestBody(req, vehicleTableFields, next);
+    const error = validateRequestBody(req, vehicleTableFields, next);
+    if (error instanceof Error) {
+      return next(error);
+    }
 
     const { user_id } = req.user;
     const newVehicle = { user_id };
@@ -74,7 +77,10 @@ exports.createVehicle = async (req, res, next) => {
 // @access Private
 exports.updateVehicle = (req, res, next) => {
   try {
-    validateRequestBody(req, vehicleTableFields, next);
+    const error = validateRequestBody(req, vehicleTableFields, next);
+    if (error instanceof Error) {
+      return next(error);
+    }
 
     const userId = req.user.user_id;
     const { vehicleId } = req.params;

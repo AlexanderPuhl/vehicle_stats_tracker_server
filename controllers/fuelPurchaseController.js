@@ -41,7 +41,10 @@ exports.getOneFuelPurchase = async (req, res, next) => {
 // @access Private
 exports.createFuelPurchase = async (req, res, next) => {
   try {
-    validateRequestBody(req, fuelPurchaseTableFields, next);
+    const error = validateRequestBody(req, fuelPurchaseTableFields, next);
+    if (error instanceof Error) {
+      return next(error);
+    }
 
     const { user_id } = req.user;
     const newFuelPurchase = { user_id };
@@ -74,7 +77,10 @@ exports.createFuelPurchase = async (req, res, next) => {
 // @access Private
 exports.updateFuelPurchase = (req, res, next) => {
   try {
-    validateRequestBody(req, fuelPurchaseTableFields, next);
+    const error = validateRequestBody(req, fuelPurchaseTableFields, next);
+    if (error instanceof Error) {
+      return next(error);
+    }
 
     const userId = req.user.user_id;
     const { fuelPurchaseId } = req.params;
